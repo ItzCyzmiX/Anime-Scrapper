@@ -16,7 +16,7 @@ user = supabase.auth.sign_in_with_password(
 response = supabase.table("Characters").select("*").execute()
 characters = []
 
-for char in enumerate(response.data):  
+for char in response.data:  
     characters.append({
         "name": char.name,
         "series": char.series
