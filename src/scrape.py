@@ -92,9 +92,12 @@ try:
             
             
             safe_name = "".join(c for c in name if c.isalnum() or c in (' ', '_', '-'))
+            safe_name = safe_name.replace(" ", "_")
             safe_series = "".join(c for c in series if c.isalnum() or c in (' ', '_', '-'))
+            safe_series = safe_series.replace(" ", "_")
             path = f"./assets/avatars/{safe_name}_{safe_series}." + image.split(".")[-1]
             link = ""
+            
             if download_image(image, path):
                 with open(path, 'rb') as f:
                     res = supabase.storage.from_("avatars").upload(
@@ -104,6 +107,9 @@ try:
                     )
                 
                 link = supabase.storage.from_("avatars").get_public_url(path)
+                
+                # delete the local file
+                os.remove(path)
                     
             if not link:
                 print(f"Error uploading image {image} to Supabase Storage")
@@ -112,7 +118,7 @@ try:
             character = {
                 "name": name,
                 "series": series,
-                "avatar": link.get("publicURL"),
+                "avatar": link,
             }
             
             if character not in characters:
