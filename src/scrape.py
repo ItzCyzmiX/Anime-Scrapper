@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.service import Service
 from webdriver_manager.firefox import GeckoDriverManager
-import urllib.request
+import requests
 import os
 
 url = "https://sgvkmwnesmllzgmdpddw.supabase.co"
@@ -39,6 +39,26 @@ def setup_driver():
     
     return driver
 
+def download_image(image_url, save_path):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://www.anime-planet.com/'
+    }
+    
+    try:
+        response = requests.get(image_url, headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        
+        with open(save_path, 'wb') as f:
+            f.write(response.content)
+        return True
+    except requests.exceptions.RequestException as e:
+        print(f"Error downloading image {image_url}: {str(e)}")
+        return False
+
 characters = []
 try:
     cur_page = 1
@@ -71,16 +91,23 @@ try:
                 series = "Attack on Titan"
             
             
-            path = f"./assets/avatars/{name}_{series}." + image.split(".")[-1]
-            urllib.request.urlretrieve(image, path)
-            with open(path, 'rb') as f:
-                res = supabase.storage.from_("avatars").upload(
-                    file=f,
-                    path=path,
-                    file_options={"cache-control": "3600", "upsert": "false"},
-                )
-            
-            link = supabase.storage.from_("avatars").get_public_url(path)
+            safe_name = "".join(c for c in name if c.isalnum() or c in (' ', '_', '-'))
+            safe_series = "".join(c for c in series if c.isalnum() or c in (' ', '_', '-'))
+            path = f"./assets/avatars/{safe_name}_{safe_series}." + image.split(".")[-1]
+            link = ""
+            if download_image(image, path):
+                with open(path, 'rb') as f:
+                    res = supabase.storage.from_("avatars").upload(
+                        file=f,
+                        path=path,
+                        file_options={"cache-control": "3600", "upsert": "false"},
+                    )
+                
+                link = supabase.storage.from_("avatars").get_public_url(path)
+                    
+            if not link:
+                print(f"Error uploading image {image} to Supabase Storage")
+                continue
             
             character = {
                 "name": name,
