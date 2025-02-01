@@ -18,8 +18,8 @@ characters = []
 
 for char in response.data:  
     characters.append({
-        "name": char.name,
-        "series": char.series
+        "name": char.get('name'),
+        "series": char.get('series')
     })
 
 driver = webdriver.Firefox()
@@ -55,8 +55,7 @@ while True:
         break 
     else:
         prev_height = new_height
-    
-    scrolls += 1
+
 
 response = (
     supabase.table("Characters")
