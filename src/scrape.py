@@ -38,8 +38,8 @@ def setup_driver():
     
     return driver
 
+characters = []
 try:
-    characters = []
     cur_page = 1
 
     driver = setup_driver()
@@ -53,7 +53,7 @@ try:
         characters_rows = characters_table.find_elements(By.TAG_NAME, "tr")
         
         for row in characters_rows:
-            image = row.find_element(By.TAG_NAME, "img").get_attribute("src")
+            image = row.find_element(By.TAG_NAME, "img").get_attribute("src").split("?")[0]
             name = row.find_element(By.CSS_SELECTOR, "a.name").text
             animes_in = row.find_element(By.CSS_SELECTOR, "td.tableAnime").find_elements(By.TAG_NAME, "li")
             series = ""
