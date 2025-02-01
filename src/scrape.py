@@ -2,12 +2,21 @@ from supabase import create_client
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
+from webdriver_manager.firefox import GeckoDriverManager
 import time 
 import pprintpp
 import os
 
-print("GeckoDriver path:", os.popen("which geckodriver").read().strip())
-print("Firefox version:", os.popen("firefox --version").read().strip())
+def setup_driver():
+  
+    firefox_options = Options()
+    firefox_options.add_argument("--headless")  # Runs in headless mode
+    
+    # Setup Firefox with GeckoDriver
+    service = Service(GeckoDriverManager().install())
+    return webdriver.Firefox(service=service, options=firefox_options)
+
 
 url = "https://sgvkmwnesmllzgmdpddw.supabase.co"
 key = os.environ.get('SUPABASE_KEY')
@@ -26,10 +35,8 @@ for char in response.data:
         "series": char.get('series')
     })
 
-options = Options()
-options.headless = True
-driver = webdriver.Firefox(options=options)
-driver.maximize_window()
+driver = setup_driver()
+
 
 driver.get('https://www.personality-database.com/type/14/entp-anime-characters')
 
@@ -71,4 +78,4 @@ response = (
 
 pprintpp.pprint(response)
 
-driver.close()
+driver.quit()
