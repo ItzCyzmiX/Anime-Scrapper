@@ -95,7 +95,7 @@ def setup_driver():
 
 
 try:
-    driver = setup_driver
+    driver = setup_driver()
     
     
     driver.get('https://www.personality-database.com/type/14/entp-anime-characters')
