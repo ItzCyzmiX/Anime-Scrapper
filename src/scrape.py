@@ -6,6 +6,9 @@ import time
 import pprintpp
 import os
 
+print("GeckoDriver path:", os.popen("which geckodriver").read().strip())
+print("Firefox version:", os.popen("firefox --version").read().strip())
+
 url = "https://sgvkmwnesmllzgmdpddw.supabase.co"
 key = os.environ.get('SUPABASE_KEY')
 supabase = create_client(url, key)
