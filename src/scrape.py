@@ -1,6 +1,7 @@
 from supabase import create_client
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
 import time 
 import pprintpp
 import os
@@ -22,12 +23,14 @@ for char in response.data:
         "series": char.get('series')
     })
 
-driver = webdriver.Firefox()
+options = Options()
+options.headless = True
+driver = webdriver.Firefox(options=options)
 driver.maximize_window()
 
 driver.get('https://www.personality-database.com/type/14/entp-anime-characters')
 
-time.sleep(2)
+time.sleep(10)
 
 prev_height = driver.execute_script('return document.body.scrollHeight')
 
@@ -48,7 +51,7 @@ while True:
 
     
     driver.execute_script('window.scrollTo(0, document.body.scrollHeight)')
-    time.sleep(2)
+    time.sleep(5)
     new_height = driver.execute_script('return document.body.scrollHeight')
     
     if new_height == prev_height:
