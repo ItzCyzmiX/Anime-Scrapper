@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.service import Service
 from webdriver_manager.firefox import GeckoDriverManager
+import urllib.request
 import os
 
 url = "https://sgvkmwnesmllzgmdpddw.supabase.co"
@@ -62,11 +63,29 @@ try:
                     series = anime.text
                 elif series and len(series) > len(anime.text):
                     series = anime.text
+                    
+            # Fixing some series names
+            if series == "Juju Sanpo":
+                series = "Jujutsu Kaisen"
+            elif series == "Spoof on Titan":
+                series = "Attack on Titan"
+            
+            
+            path = f"./assets/avatars/{name}_{series}." + image.split(".")[-1]
+            urllib.request.urlretrieve(image, path)
+            with open(path, 'rb') as f:
+                res = supabase.storage.from_("avatars").upload(
+                    file=f,
+                    path=path,
+                    file_options={"cache-control": "3600", "upsert": "false"},
+                )
+            
+            link = supabase.storage.from_("avatars").get_public_url(path)
             
             character = {
                 "name": name,
                 "series": series,
-                "avatar": image
+                "avatar": link.get("publicURL"),
             }
             
             if character not in characters:
