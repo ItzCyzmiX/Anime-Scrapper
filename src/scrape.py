@@ -105,7 +105,7 @@ try:
     prev_height = driver.execute_script('return document.body.scrollHeight')
     scrolls = 0
     current_char = 0
-    while scrolls < 5:
+    while scrolls < 50:
         try: 
             wait = WebDriverWait(driver, 10)
             character_cards = wait.until(
@@ -114,7 +114,6 @@ try:
             for id, char in enumerate(character_cards):
                 name = char.find_element(By.CSS_SELECTOR, "h2.info-name").text
                 series = char.find_element(By.CSS_SELECTOR, "div.info-subcategory").text
-             
                 avatar_img = scroll_into_view_and_get_image(driver, char)
                 character_data = {
                     "name": name,
@@ -160,6 +159,6 @@ try:
 except Exception as e:
     pprintpp.pprint(f"Fatale Error: {str(e)}")
     raise e
-
-
-driver.quit()
+finally:
+    driver.quit()
+    
