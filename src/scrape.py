@@ -11,30 +11,6 @@ import time
 import pprintpp
 import os
 
-def setup_driver():
-    firefox_options = Options()
-    firefox_options.add_argument("--headless")
-    firefox_options.add_argument("--no-sandbox")
-    firefox_options.add_argument("--disable-dev-shm-usage")
-    # Set specific window size to ensure consistency
-    firefox_options.add_argument("--width=1920")
-    firefox_options.add_argument("--height=1080")
-    
-    # Add timeout settings
-    firefox_options.set_preference("network.http.connection-timeout", 60)
-    firefox_options.set_preference("network.http.response-timeout", 60)
-    
-    service = Service(GeckoDriverManager().install())
-    driver = webdriver.Remote(
-        command_executor='http://localhost:4444/wd/hub',
-        options=firefox_options
-    )
-    # Set page load timeout
-    driver.set_page_load_timeout(30)
-    driver.implicitly_wait(20)
-    
-    return driver
-
 url = "https://sgvkmwnesmllzgmdpddw.supabase.co"
 key = os.getenv("SUPABASE_KEY")
 supabase = create_client(url, key)
@@ -67,7 +43,8 @@ def scroll_into_view_and_get_image(driver, element):
     except Exception as e:
         print(f"Error getting image: {str(e)}")
         return None
-    
+
+
 def setup_driver():
     firefox_options = Options()
     firefox_options.add_argument("--headless")
@@ -82,17 +59,15 @@ def setup_driver():
     firefox_options.set_preference("network.http.response-timeout", 60)
     
     service = Service(GeckoDriverManager().install())
-    driver = webdriver.Firefox(
-        service=service, 
+    driver = webdriver.Remote(
+        command_executor='http://localhost:4444/wd/hub',
         options=firefox_options
     )
-    
     # Set page load timeout
     driver.set_page_load_timeout(30)
     driver.implicitly_wait(20)
     
     return driver
-
 
 try:
     driver = setup_driver()
@@ -111,7 +86,8 @@ try:
             character_cards = wait.until(
                 EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'a.profile-card-link'))
             )
-            for id, char in enumerate(character_cards):
+            for i in range(current_char, len(character_cards)):
+                char = character_cards[i]
                 name = char.find_element(By.CSS_SELECTOR, "h2.info-name").text
                 series = char.find_element(By.CSS_SELECTOR, "div.info-subcategory").text
                 avatar_img = scroll_into_view_and_get_image(driver, char)
@@ -120,12 +96,14 @@ try:
                     "series": series,
                     "avatar": avatar_img
                 }
-                current_char += 1
+     
                 if not character_data in characters:
                     characters.append(character_data)
                     pprintpp.pprint(f"Added: {name} from {series}")
                 else:
                     pprintpp.pprint(f"Skipped: {name} from {series} as it already exists")
+                
+                current_char += 1
 
             
             driver.execute_script('window.scrollTo(0, document.body.scrollHeight)')
