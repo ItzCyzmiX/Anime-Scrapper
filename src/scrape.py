@@ -4,7 +4,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.service import Service
 from webdriver_manager.firefox import GeckoDriverManager
-import time 
 import pprintpp
 import os
 
@@ -40,11 +39,11 @@ driver = setup_driver()
 
 driver.get('https://www.personality-database.com/type/14/entp-anime-characters')
 
-time.sleep(10)
+driver.implicitly_wait(10)
 
 prev_height = driver.execute_script('return document.body.scrollHeight')
-
-while True:
+scrolls = 0
+while scrolls < 50:
     character_cards = driver.find_elements(By.CSS_SELECTOR, 'a.profile-card-link')
 
     for char in character_cards:
@@ -58,10 +57,11 @@ while True:
 
         if not character_data in characters:
             characters.append(character_data)
+            pprintpp.pprint(f"Added: {name} from {series}")
 
     
     driver.execute_script('window.scrollTo(0, document.body.scrollHeight)')
-    time.sleep(5)
+    driver.implicitly_wait(5)
     new_height = driver.execute_script('return document.body.scrollHeight')
     
     if new_height == prev_height:
@@ -69,12 +69,21 @@ while True:
     else:
         prev_height = new_height
 
+    scrolls += 1
 
-response = (
-    supabase.table("Characters")
-    .insert(characters)
-    .execute()
-)
+new_characters = [char for char in characters if char not in response.data]
+pprintpp.pprint(f"Scraped {len(new_characters)} characters\nAdding to database...")
+if new_characters:
+    response = (
+        supabase.table("Characters")
+        .insert(new_characters)
+        .execute()
+    )
+    pprintpp.pprint(f"{len(new_characters)} Characters added to database!")
+    pprintpp.pprint(response)
+else:
+    pprintpp.pprint("No new characters to add.")
+
 
 pprintpp.pprint(response)
 
