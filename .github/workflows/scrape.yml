@@ -1,9 +1,12 @@
 name: Daily Scrape
 
 on:
-    push:
-        branches:
-            - main # Specify the branch to trigger the workflow on push
+    workflow_dispatch:
+      inputs:
+        reason:
+          description: 'Scrape Characters'
+          required: false
+          default: 'Manual trigger'
 
 jobs:
     scrape:
