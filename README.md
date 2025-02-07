@@ -1,6 +1,7 @@
 # Anime Character Scraper
 
 This project is a web scraper that collects information about anime characters from [Anime-Planet](https://www.anime-planet.com/) and stores it in a Supabase database.
+It is used for [this project](https://github.com/ItzCyzmiX/Who-Am-AI)
 
 ## Features
 
