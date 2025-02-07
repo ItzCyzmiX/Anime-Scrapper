@@ -6,6 +6,9 @@ from selenium.webdriver.firefox.service import Service
 from webdriver_manager.firefox import GeckoDriverManager
 import requests
 import os
+import sys
+
+sys.stdout.reconfigure(line_buffering=True) # CI logs
 
 url = "https://sgvkmwnesmllzgmdpddw.supabase.co"
 key = os.getenv("SUPABASE_KEY")
@@ -56,7 +59,7 @@ def download_image(image_url, save_path):
             f.write(response.content)
         return True
     except requests.exceptions.RequestException as e:
-        print(f"Error downloading image {image_url}: {str(e)}")
+        print(f"Error downloading image {image_url}: {str(e)}", flush=True)
         return False
 
 characters = []
@@ -128,7 +131,7 @@ try:
 
                     
             if not link:
-                print(f"Error uploading image {image} to Supabase Storage")
+                print(f"Error uploading image {image} to Supabase Storage", flush=True)
                 continue
             
             character = {
@@ -139,21 +142,21 @@ try:
             
             if character not in characters:
                 characters.append(character)
-                print(f"Added: {name} from {series}")  
+                print(f"Added: {name} from {series}", flush=True)  
 
         cur_page += 1
 except Exception as e:
     print(f"Fatale Error: {str(e)}")
     raise e
 finally:
-    print(f"Scraped {len(characters)} characters\nAdding to database...")
+    print(f"Scraped {len(characters)} characters\nAdding to database...", flush=True)
     
     response = (
         supabase.table("Characters")
         .insert(characters)
         .execute()
     )
-    print(f"{len(characters)} Characters added to database!")
+    print(f"{len(characters)} Characters added to database!", flush=True)
 
     driver.quit()
     
