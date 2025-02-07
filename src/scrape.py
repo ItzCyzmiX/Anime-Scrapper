@@ -104,22 +104,27 @@ try:
             path = f"./assets/avatars/{safe_name}_{safe_series}." + image.split(".")[-1]
             link = ""
             
-            try:
-                if download_image(image, path):
-                    with open(path, 'rb') as f:
+            
+            if download_image(image, path):
+                with open(path, 'rb') as f:
+                    try:
                         res = supabase.storage.from_("avatars").upload(
                             file=f,
                             path=path,
                             file_options={"cache-control": "3600", "upsert": "false"},
                         )
-                    
+                    except Exception as e:
+                        print(f'{str(e)}')
+                
+                try:
                     link = supabase.storage.from_("avatars").get_public_url(path)
-                    
-                    # delete the local file
-                    os.remove(path)
+                except Exception as e:
+                    link = ""
+                
+                # delete the local file
+                os.remove(path)
 
-            except Exception as e:
-                continue
+ 
 
                     
             if not link:
