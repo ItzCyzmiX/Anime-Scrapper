@@ -65,7 +65,7 @@ try:
 
     driver = setup_driver()
     
-    for i in range(1, 21): # where all known characters are located 
+    for i in range(1, 51): # scraping the entire site 
         driver.get('https://www.anime-planet.com/characters/all?page=' + str(cur_page))
 
         driver.implicitly_wait(3)
@@ -89,6 +89,12 @@ try:
                 series = "Jujutsu Kaisen"
             elif series == "Spoof on Titan":
                 series = "Attack on Titan"
+            elif series == "Demon Slayer: Kimetsu Academy" or series == "Kimetsu Gakuen: Valentine-hen":
+                series = "Demon Slayer"
+            elif series == "The Seven Stories":
+                series = "Seven Deadly Sins"
+            elif series == "Dr. Slump":
+                series = "Dragon Ball"
             
             
             safe_name = "".join(c for c in name if c.isalnum() or c in (' ', '_', '-'))
@@ -98,18 +104,23 @@ try:
             path = f"./assets/avatars/{safe_name}_{safe_series}." + image.split(".")[-1]
             link = ""
             
-            if download_image(image, path):
-                with open(path, 'rb') as f:
-                    res = supabase.storage.from_("avatars").upload(
-                        file=f,
-                        path=path,
-                        file_options={"cache-control": "3600", "upsert": "false"},
-                    )
-                
-                link = supabase.storage.from_("avatars").get_public_url(path)
-                
-                # delete the local file
-                os.remove(path)
+            try:
+                if download_image(image, path):
+                    with open(path, 'rb') as f:
+                        res = supabase.storage.from_("avatars").upload(
+                            file=f,
+                            path=path,
+                            file_options={"cache-control": "3600", "upsert": "false"},
+                        )
+                    
+                    link = supabase.storage.from_("avatars").get_public_url(path)
+                    
+                    # delete the local file
+                    os.remove(path)
+
+            except Exception as e:
+                continue
+
                     
             if not link:
                 print(f"Error uploading image {image} to Supabase Storage")
